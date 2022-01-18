@@ -26,20 +26,45 @@ Target due date: 2022-01-18
 
 1. Post the link to your forked GitHub repository below. Your repo should include one or more commits and an edited README file.  
 
->  Link:
+>  Link:https://github.com/jbc70/Water_Data_Analytics_2022
 
 ## Data Visualization Exercises
 
 2. Set up your work session. Check your working directory, load packages `tidyverse`,  `dataRetrieval`, and `zoo`. Set your ggplot theme as theme_classic (you may need to look up how to set your theme).
 
 ```{r, message = FALSE}
+#check working directory
+getwd()
 
+#load packages
+library(tidyverse)
+library(dataRetrieval)
+library(zoo)
+
+#set ggplot theme
+theme_set(theme_classic())
+#edit: not sure this worked
 ```
 
 3. Upload discharge data for the Eno River at site 02096500 for the same dates as we studied in class (2012-01-01 through 2021-12-31). Obtain data for discharge. Rename the columns with informative titles, as we did in class. 
 
 ```{r}
+#import data
+EnoDischarge2 <- readNWISdv(siteNumbers = "02096500", 
+                           parameterCd = "00060", 
+                           startDate = "2012-01-01",
+                           endDate = "2021-12-31")
+# not sure where parameterCd, startDate, endDate commands come from, just copied them from the lesson named "01_Introduction"
+#same with the parameter code
 
+#rename columns
+names(EnoDischarge2)[4:5] <- c("Discharge_cfs", "Approval.Code")
+
+#this is how to see dataset attributes - information about what is in the set, where it comes from, etc.
+#variable attributes
+attr(EnoDischarge2, "variableInfo")
+#site attributes
+attr(EnoDischarge2, "siteInfo")
 ```
 
 
