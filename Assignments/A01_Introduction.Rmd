@@ -1,6 +1,6 @@
 ---
 title: "Assignment 1: Introduction"
-author: "Student Name"
+author: "Jack Carpenter"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -79,19 +79,43 @@ attr(EnoDischarge2, "siteInfo")
 * Add a legend. (hint: Google "add legend two geom layers ggplot")
 
 ```{r}  
+#got stuck here and had to look at the key - syntax is the hard part
+#add column in m3/s
+EnoDischarge2 <- EnoDischarge2 %>%
+mutate(Discharge_metric = Discharge_cfs/35.3147,
+       Discharge_rollmean = rollmean(Discharge_metric, 30, fill = NA))
+#could not get R to recognize Discharge_cfs - I guess the %>% makes the difference although I'm not sure why
+#let's take a look if %>% worked
+glimpse(EnoDischarge2)
+#looks like it worked I think
 
+#lets make a ggplot
+EnoPlot2 <-
+  ggplot(EnoDischarge2, aes(x = Date)) + 
+  geom_line(aes(y = Discharge_metric, color = "Daily")) +
+  geom_line(aes(y = Discharge_rollmean, color = "30-day")) + 
+  scale_color_manual(values = c("Daily" = "darkblue", "30-day" = "red"))+
+  scale_y_log10(name = expression("Discharge (m"^3*"/s")) +
+  theme_classic() +
+  theme(axis.title.x = element_blank(), legend.title = element_blank(), legend.position = "top")
 
+#Let's see if it worked
+EnoPlot2
 ```
 
 5. In what ways was the second plot a more effective visualization than the first? 
 
 > ANSWER: 
+The second plot has both the data and an average plotted, allowing for comparison. Color-coding also allows for the parts of the plot to be easily distinguished and thus much more useful to display information quickly and easily. The fact that the second plot is in metric arguably makes it easier to read for the majority of scientists, although since this is a US audience that point is somewhat negated. 
 
 6. What portions of the coding were challenging for you?
 
 > ANSWER: 
+Section 4 was really challenging. I couldn't figure out how to get the mutate function to work and ended up needing the key to figure out the syntax. The syntax on a lot of this is really the hardest part - unlike excel R doesn't helpfully tell you when you're missing an input, it just doesn't work so figuring out what I'm missing to make things work is the hard part. Some of the smaller parts I also don't quite understand, like the "fill" for the rolling mean and why "color" for the geom_lines are named and then specified as colors later. What does "fill" do and why not just name the color there and then without the extra step? The "element_blank" is also a little confusing as well - what does that mean? 
+
 
 7. Interpret the graph you made. What are the things you notice about within- and across-year variability, as well as the differences between daily values and 30-day rolling mean?
 
 > ANSWER: 
+Within each year, there is clear seasonal variability in both the dailies and rolling mean. 2017 is an erratic year - there is a large low-flow period in the middle of where the runoff spike should be. As time goes on, there appears to be a slight positive increase in both max and min discharges each year, indicating a wetter trend. There isn't a ton of interannual variability, relative to within a given year, the majority of data points appear to be within the same bounds as each other with that wetting trend. Clearly late 2015, late 2019, and late 2021 are exceptionally dry points. 
 
