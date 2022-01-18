@@ -54,13 +54,15 @@ EnoDischarge2 <- readNWISdv(siteNumbers = "02096500",
                            parameterCd = "00060", 
                            startDate = "2012-01-01",
                            endDate = "2021-12-31")
-# not sure where parameterCd, startDate, endDate commands come from, just copied them from the lesson named "01_Introduction"
+# not sure where parameterCd, startDate, endDate commands come from, 
+#just copied them from the lesson named "01_Introduction"
 #same with the parameter code
 
 #rename columns
 names(EnoDischarge2)[4:5] <- c("Discharge_cfs", "Approval.Code")
 
-#this is how to see dataset attributes - information about what is in the set, where it comes from, etc.
+#this is how to see dataset attributes
+#information about what is in the set, where it comes from, etc.
 #variable attributes
 attr(EnoDischarge2, "variableInfo")
 #site attributes
@@ -84,7 +86,8 @@ attr(EnoDischarge2, "siteInfo")
 EnoDischarge2 <- EnoDischarge2 %>%
 mutate(Discharge_metric = Discharge_cfs/35.3147,
        Discharge_rollmean = rollmean(Discharge_metric, 30, fill = NA))
-#could not get R to recognize Discharge_cfs - I guess the %>% makes the difference although I'm not sure why
+#could not get R to recognize Discharge_cfs
+#I guess the %>% makes the difference although I'm not sure why
 #let's take a look if %>% worked
 glimpse(EnoDischarge2)
 #looks like it worked I think
@@ -97,7 +100,8 @@ EnoPlot2 <-
   scale_color_manual(values = c("Daily" = "darkblue", "30-day" = "red"))+
   scale_y_log10(name = expression("Discharge (m"^3*"/s")) +
   theme_classic() +
-  theme(axis.title.x = element_blank(), legend.title = element_blank(), legend.position = "top")
+  theme(axis.title.x = element_blank(), legend.title = element_blank(), 
+        legend.position = "top")
 
 #Let's see if it worked
 EnoPlot2
