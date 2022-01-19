@@ -33,6 +33,11 @@ library(rLakeAnalyzer)
 
 # Load data
 NTLdata <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
+#read.csv is different from read_csv, both do same thing
+#read_csv is faster
+#to read in a file, use ". to go into a folder in the working directory
+#relative file path is relative to working directory
+#here package does something similar
 
 # set ggplot theme
 theme_set(theme_classic())
@@ -51,23 +56,38 @@ Common steps/checks for data wrangling:
 ```{r}
 # Is the date column perceived as a date by R?
 class(NTLdata$sampledate)
+#use $ to designate column here - using base R
 NTLdata$sampledate <- as.Date(NTLdata$sampledate, format = "%m/%d/%y")
 class(NTLdata$sampledate)
 # What does this column look like now?
+# have to provide format before change (format above), and need to specify 2 vs 4-digit year
+#lowercase y is 2-digit, uppercase y is 4-digit
+
 
 # Remove rows that contain NAs in temperature column
 dim(NTLdata)
 NTLdata <- NTLdata %>%
+  #%>% is pipe - links things together like "then" in sentence
   drop_na(temperature_C)
-dim(NTLdata)  
+# don't need $ here because using dplyr package and just need column name
+#alternative is NTLdata <- drop_na(NTLdata, temperature_C)
+# Pipe allows another line to be added easily instead of all in one line
+dim(NTLdata)
+
 
 # How many observations are there for each lake?
 summary(NTLdata$lakename)
+#back to the $ to identify the column
 summary(as.factor(NTLdata$lakename))
+#gives a count for how many temperature data points there are since we removed
+#NA's in temp column
 
 # Let's choose the two lakes with the most data
 NTLdata_PeterPaul <- NTLdata %>%
   filter(lakename %in% c("Paul Lake", "Peter Lake"))
+# new dataset with just the most sampled lakes
+# c concatenates a list
+# %in% means includes
 
 # What is another way to use the filter command to get to the same result?
 NTLdata_PeterPaul <- NTLdata %>%
@@ -105,17 +125,26 @@ Let's also try using the traditional limnological graph type, with depth on the 
 ggplot(Pauldata, aes(x = depth, y = temperature_C)) + 
   geom_point(alpha = 0.5) +
   labs(y = expression("Temperature "(degree*C)), x = "Depth (m)")
+# within ggplot need to specify aesthetics
+# color, shape, etc
+# use a plus instead of a pipe with ggplot to indicate to continue on the next line
+# alpha is transparency command
 
 ggplot(Pauldata, aes(x = temperature_C, y = depth, color = daynum)) +
   geom_point(alpha = 0.5) +
   scale_y_reverse() +
   scale_color_viridis_c() +
   labs(x = expression("Temperature "(degree*C)), y = "Depth (m)", color = "DOY")
-
+# DOY stands for Day of Year
 ```
 
 How do temperatures at the surface compare to temperatures at the mid-depths and at the bottom?
 <add notes here>
+Upper water column - epilimnion
+Lower water column - hypolimnion
+Water is densest at 4 degrees celsius
+dimictic lake means mixes twice during the year (spring and fall)
+
 
 
 ### Graphing seasonal water profiles
