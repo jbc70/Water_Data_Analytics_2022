@@ -145,8 +145,6 @@ Lower water column - hypolimnion
 Water is densest at 4 degrees celsius
 dimictic lake means mixes twice during the year (spring and fall)
 
-
-
 ### Graphing seasonal water profiles
 
 Lakes in the North Temperate Lakes LTER are dimictic, meaning they mix fully twice per year. When the lakes are not mixed (stratified), the top layer (epilimnion) and the bottom layer (hypolimnion) of the lake are different temperatures.
@@ -165,15 +163,23 @@ ggplot(subset(Pauldata, year4 == 1993),
   labs(x = expression("Temperature "(degree*C)), y = "Depth (m)", color = "DOY") 
 
 # Now, make a plot as above but with dissolved oxygen saturation instead of temperature.
-
+ggplot(subset(Pauldata, year4 == 1993), 
+       aes(x = dissolvedOxygen, y = depth, color = daynum)) +
+  geom_point(alpha = 0.5) +
+  scale_y_reverse() +
+  scale_color_viridis_c() +
+  labs(x = expression("DO"(mg/L)), y = "Depth (m)", color = "DOY")
 
 ```
 
 Why does mixing occur in the spring and fall? What are the mechanisms that make this possible?
+thermal differences as weather warms and cools
 <add notes here>
-
-
-
+Monomictic mixes once a year - happens when there is less thermal stratification. This is the winter because in the summer there is greater differenc in thermal mass between epi and hypolimnion
+Monomictic are more likely without iceover in the winter
+Polymictic - mixes several times/year - don't see strong seasonal stratification, its more commonly associated with weather events; shallower lakes
+amictic - doesn't mix; deep, sheltered lakes
+Can see the DCM right at thermocline by looking at DO plot; balance between light and nutrient availability
 ### Calculating thermoclines
 
 [rLakeAnalyzer documentation](https://cran.r-project.org/web/packages/rLakeAnalyzer/rLakeAnalyzer.pdf)
@@ -195,6 +201,7 @@ ggplot(Pauldata_thermo, aes(x = daynum, y = thermocline)) +
 
 How does thermocline depth change over the course of the year? When do we observe the most variability in thermocline depth?
 <add notes here>
+Thermocline deepens and becomes more consistent over the course of the year
 
 
 ### Climate change

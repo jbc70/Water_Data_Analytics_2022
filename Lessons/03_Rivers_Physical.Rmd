@@ -46,13 +46,14 @@ ggplot(EnoDischarge.ratingcurve, aes(x = Discharge, y = Gage.Height)) +
   geom_point(alpha = 0.5) 
 
 ```
+For discharge need volume and velocity, but hard to measure so create a rating curve. 
 
 ### Data import
 We will be using the dataRetrieval package, which allows us to access USGS hydrologic data. We will be using the hydrologic data capabilities of this package today, but the package also comes with additional functionality to access water quality data from the Water Quality Portal. 
 
 dataRetrieval Vignette:
 https://cran.r-project.org/web/packages/dataRetrieval/vignettes/dataRetrieval.html
-
+#This dataretrieval site is good to look at for what data to look for and subsequently ask for, what parameters are in the set.
 The function `whatNWISdata` allows us to access metadata about a site, including what variables have been monitored at that site, start and end dates, and the number of samples for a given variable.
 
 We will be analyzing data from the following rivers/streams today: 
@@ -72,7 +73,9 @@ NehalemSummary <- whatNWISdata(siteNumbers = "14299800")
 ```
 
 What data are available from the sites? Pay particular attention to the parameter codes and statistic codes.
-
+00060 is discharge
+00065 is gage height
+00001, 00002, and 00003 are daily max, min, mean statistics
 >
 
 What is the period of record for mean daily discharge at each of these sites?
@@ -188,17 +191,20 @@ NehalemPlot
 
 CombinedPlot <- 
   plot_grid(EnoPlot, VerdePlot, BitterrootPlot, SaukPlot, NehalemPlot, 
-            ncol = 1)
+            ncol = 1, rel_heights = c(1,1,1,1,1.2), align = "hv")
 CombinedPlot
 
 # add relative heights and align axes
 ```
 
 How does the magnitude of discharge compare for these rivers?
-
+Might be helpful to add same scale for all of them
+Specify last plot as taller to have same space as the other plots
+Specify to align axes
 >
 
 Which of these rivers have a seasonal cycle of discharge? How might you explain the presence and timing of seasonal cycles based on climatic conditions?
+Verde is ephemeral - flow with precip, but none where there isnt
 
 >
 
