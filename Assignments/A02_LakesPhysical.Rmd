@@ -1,6 +1,6 @@
 ---
 title: "Assignment 2: Physical Properties of Lakes"
-author: "Student Name"
+author: "Jack Carpenter"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -31,8 +31,42 @@ Target due date: 2022-01-25
 5. Set your ggplot theme (can be theme_classic or something else)
 
 ```{r}
+#check working directory
+getwd()
 
+#load packages
+library(tidyverse)
+library(lubridate)
+library(rLakeAnalyzer)
 
+#import dataset
+NTL_LTER_data <- read_csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
+view(NTL_LTER_data)
+
+#set date column to date format
+class(NTL_LTER_data$sampledate)
+NTL_LTER_data$sampledate <- as.Date(NTL_LTER_data$sampledate, format = "%m/%d/%y")
+class(NTL_LTER_data$sampledate)
+#now the date is Y-m-d in the spreadsheet despite me asking for m-d-y...
+#why is this? 
+
+#add a column called month
+NTL_LTER_data <- NTL_LTER_data %>%
+mutate(Month = month(sampledate))
+#for mutate need following syntax:
+#mutate(name of new column = type of data(old column))
+#Dr. Salk is the above general syntax correct?
+
+#remove temperature NA's
+dim(NTL_LTER_data)
+#is dim really necessary here?
+NTL_LTER_data <- NTL_LTER_data %>%
+  drop_na(temperature_C)
+dim(NTL_LTER_data)
+#ope looks like fewer rows of data - I guess its a check
+
+#set theme
+theme_set(theme_classic())
 ```
 
 ## Creating and analyzing lake temperature profiles
