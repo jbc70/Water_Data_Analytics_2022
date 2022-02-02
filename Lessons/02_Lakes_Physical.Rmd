@@ -202,6 +202,7 @@ ggplot(Pauldata_thermo, aes(x = daynum, y = thermocline)) +
 How does thermocline depth change over the course of the year? When do we observe the most variability in thermocline depth?
 <add notes here>
 Thermocline deepens and becomes more consistent over the course of the year
+Deeper lakes tend to have deeper and more stable thermoclines
 
 
 ### Climate change

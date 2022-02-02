@@ -27,7 +27,7 @@ library(tidyverse)
 library(dataRetrieval)
 library(lubridate)
 library(lfstat)
-
+# lfstat = low-flow-statistics
 
 theme_set(theme_classic())
 ```
@@ -54,7 +54,7 @@ Let's import discharge data for the Eno River near Durham for all available date
 EnoDischarge <- readNWISdv(siteNumbers = "02085070",
                      parameterCd = "00060", # discharge (ft3/s)
                      startDate = "", 
-                     endDate = "2021-09-30")
+                     endDate = "2021-09-30") # end of the water year
 
 names(EnoDischarge)[4:5] <- c("Discharge", "Approval.Code")
 
@@ -74,9 +74,11 @@ EnoDischarge <- EnoDischarge %>%
   mutate(Year = year(Date), 
          WaterYear = water_year(Date, origin = "usgs")) %>%
   filter(WaterYear != "1963")
-
+class(EnoDischarge$WaterYear)
+# specify USGS water year, other places use different ones (ie Aus)
 # Water Year is a factor. We want to re-classify as numeric.
 EnoDischarge$WaterYear <- as.numeric(as.character(EnoDischarge$WaterYear))
+#to convert to numeric need to convert to character then to numeric from factor
 
 EnoRecurrence <- 
   EnoDischarge %>%
@@ -93,12 +95,14 @@ ggplot(EnoRecurrence, aes(x = WaterYear, y = PeakDischarge)) +
 
 ```
 
-Let's display and model the relationship between peak annual disharge and recurrence interval. We can use the statistical model to compute discharge for recurrence intervals that occur above the 30-year mark.
+Let's display and model the relationship between peak annual discharge and recurrence interval. We can use the statistical model to compute discharge for recurrence intervals that occur above the 30-year mark.
 ```{r}
 ggplot(EnoRecurrence, aes(x = RecurrenceInterval, y = PeakDischarge)) +
   geom_point() +
   scale_x_log10() +
-  geom_smooth(method = "lm")
+  geom_smooth(method = "lm", color = "black", se = FALSE)
+#lm means linear model (regression)
+#se stands for standard error
 
 Eno.RImodel <- lm(data = EnoRecurrence, PeakDischarge ~ log10(RecurrenceInterval))
 summary(Eno.RImodel)
@@ -140,11 +144,11 @@ Eno.RImodel$coefficients[1] + Eno.RImodel$coefficients[2]*log10(500)
 
 What differences did you see for the recurrence intervals built under different periods of record? How would your prediction of flood events differ if you were to use these models for forecasting purposes? 
 
->
+>Eno is not displaying stationary behavior, the later 30 years' floods are predicted to be larger than the previous 30 years' floods -> changing conditions
 
 What would you recommend for a watershed manager seeking to build the most accurate recurrence interval model for the Eno River?
 
-> 
+> The more recent, its a safer bet 
 
 
 ### Examining the effects of urbanization on discharge

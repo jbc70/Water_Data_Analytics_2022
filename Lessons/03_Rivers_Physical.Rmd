@@ -204,7 +204,7 @@ Specify to align axes
 >
 
 Which of these rivers have a seasonal cycle of discharge? How might you explain the presence and timing of seasonal cycles based on climatic conditions?
-Verde is ephemeral - flow with precip, but none where there isnt
+Verde is ephemeral - flow with precip, but none when there isnt
 
 >
 
@@ -223,10 +223,10 @@ names(BitterrootDischarge.Historical)[4:5] <- c("Discharge", "Approval.Code")
 
 BitterrootDischarge.Historical <- mutate(BitterrootDischarge.Historical, 
                                          DOY = yday(Date))
-
+#yday function gives day of year (DOY)
 BitterrootDischarge.Pattern <- BitterrootDischarge.Historical %>%
   group_by(DOY) %>%
-  summarise(Median.Discharge = median(Discharge), 
+  summarise(Median.Discharge = median(Discharge, na.rm = TRUE), 
             p95.Discharge = quantile(Discharge, 0.95, na.rm = TRUE),
             p5.Discharge = quantile(Discharge, 0.05, na.rm = TRUE))
 
@@ -234,7 +234,8 @@ ggplot(BitterrootDischarge.Pattern, aes(x = DOY)) +
   geom_line(aes(y = Median.Discharge)) +
   geom_line(aes(y = p95.Discharge), color = "gray") +
   geom_line(aes(y = p5.Discharge), color = "gray") +  
-  labs(x = "Day of Year", y = expression("Discharge (ft"^3*"/s)")) 
+  labs(x = "Day of Year", y = expression("Discharge (ft"^3*"/s)"))
+# y aesthetic separated out for each geom_line, because y is different but x is the same
 ```
 
 
