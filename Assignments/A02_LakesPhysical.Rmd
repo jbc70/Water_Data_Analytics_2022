@@ -52,7 +52,7 @@ class(NTL_LTER_data$sampledate)
 
 #add a column called month
 NTL_LTER_data <- NTL_LTER_data %>%
-mutate(Month = month(sampledate))
+  mutate(month = month(sampledate))
 #for mutate need following syntax:
 #mutate(name of new column = type of data(old column))
 #Dr. Salk is the above general syntax correct?
@@ -74,10 +74,23 @@ theme_set(theme_classic())
 5. For the year 1993, plot temperature and dissolved oxygen profiles for all six lakes in the dataset (as two separate ggplots). Use the `facet_wrap` function to plot each lake as a separate panel in the plot. Plot day of year as your color aesthetic and use a reverse y scale to represent depth. 
 
 What seasonal trends do you observe, and do these manifest differently in each lake?
-
+Answer:
+In the temperature plot, each lake has a seasonal progression like we talked about in class with increasing temperature and deepening thermocline throughout the summer and mixing in the winter. 
+The DO plots vary more widely between lakes. Paul, Peter, Tuesday,East Long, and West Long lakes show very similar DO profiles that show DO decrease over the summer, hold steady in the winter at all depths, and increase in the spring. I'm not sure what's happening with Central Long, but I think it looks strange from the fact that it has fewer data points rather than becaue it behaves vastly differently. 
 ```{r}
-
-
+ggplot(subset(NTL_LTER_data, year4 == 1993), aes(x = temperature_C, y = depth, color = daynum)) +
+  geom_point(alpha = 0.5) +
+  scale_y_reverse() + 
+  scale_color_viridis_c() +
+  labs(x = expression("Temperature "(Degree*C)), y = "Depth (m)", color = "DOY")+
+  facet_wrap(vars(lakename))
+  
+ggplot(subset(NTL_LTER_data, year4 == 1993), aes(x = dissolvedOxygen, y = depth, color = daynum)) +
+  geom_point(alpha = 0.5) +
+  scale_y_reverse() +
+  scale_color_viridis_c() +
+  labs(x = expression("DO"(mg/L)), y = "Depth (m)", color = "DOY") +
+  facet_wrap(vars(lakename))
 ```
 
 6. Create a new dataset that calculates thermocline depths for all lakes on all dates (hint: you will need group by lake, year, month, DOY, and sample date).
@@ -85,8 +98,29 @@ What seasonal trends do you observe, and do these manifest differently in each l
 8. Create a boxplot of thermocline depth distributions split up by lake name on the x axis and by month as the fill color (hint: you will need to set Month as a factor). Choose a color palette other than the ggplot default, relabel axes and legend, and place the legend on the top of the graph.
 
 Do all the lakes have a similar seasonal progression of thermocline deepening? Which lakes have the deepest thermoclines, and how does this relate to their maximum depth? 
+Answer:
+All the lakes do appear to show a similar seasonal progression of thermocline deepening. The only one that might not is hummingbird lake, but that also may be a matter of scale - the change is minor compared to others.
+Peter and Central Long have the deepest thermoclines. Peter is a deep lake, Central Long probably is as well. Hummingbird has a very shallow thermocline and appears to be a shallow lake. 
 
 ```{r}
+# create a new dataset
+thermocline_data <- NTL_LTER_data %>%
+  group_by(lakename, year4, month, daynum, sampledate) %>%
+  summarise(thermocline_depth = thermo.depth(wtr = temperature_C, depths = depth, seasonal = FALSE)) %>%
+  filter(thermocline_depth > 1)
 
+#let's plot thermocline depths by lake
+ggplot(thermocline_data, aes(x = daynum, y = thermocline_depth, color = lakename)) +
+  geom_point(alpha = 0.5) +
+  scale_color_viridis_d() +
+  labs(x = "DOY", y = "thermocline_depth (m)", color = "lakename")
+
+#now for the boxplots
+ggplot(thermocline_data, aes(x = lakename, y = thermocline_depth, fill = as.factor(month))) +
+  geom_boxplot() +
+  scale_color_viridis_d() +
+  labs(x = "LakeName", y = "Thermocline_Depth (m)", color = "Month") +
+  theme(legend.position = "top")
+  
 ```
 
