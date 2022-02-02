@@ -100,7 +100,7 @@ ggplot(subset(NTL_LTER_data, year4 == 1993), aes(x = dissolvedOxygen, y = depth,
 Do all the lakes have a similar seasonal progression of thermocline deepening? Which lakes have the deepest thermoclines, and how does this relate to their maximum depth? 
 Answer:
 All the lakes do appear to show a similar seasonal progression of thermocline deepening. The only one that might not is hummingbird lake, but that also may be a matter of scale - the change is minor compared to others.
-Peter and Central Long have the deepest thermoclines. Peter is a deep lake, Central Long probably is as well. Hummingbird has a very shallow thermocline and appears to be a shallow lake. 
+Peter and Crampton have the deepest thermoclines and both are deep lakes, whereas Hummingbird is a shallow lake and has a shallow thermocline. 
 
 ```{r}
 # create a new dataset
@@ -122,5 +122,8 @@ ggplot(thermocline_data, aes(x = lakename, y = thermocline_depth, fill = as.fact
   labs(x = "LakeName", y = "Thermocline_Depth (m)", color = "Month") +
   theme(legend.position = "top")
   
+Max_depths <- NTL_LTER_data %>%
+  group_by(lakename) %>%
+  summarise(max_depth = max(depth))
 ```
 
