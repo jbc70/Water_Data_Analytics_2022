@@ -78,6 +78,7 @@ MysterySiteDischarge.Pattern <- MysterySiteDischarge %>%
             p75.Discharge = quantile(Discharge, 0.75, na.rm = TRUE),
             p25.Discharge = quantile(Discharge, 0.25, na.rm = TRUE))
 # I think I might have the 75th and 25th percentiles backwards, but I'm not sure
+# this can also be done with quantile(data, probs = percentile)
 
 #6 GGplot!
 ggplot(MysterySiteDischarge.Pattern, aes(x = DayOfYear)) +
@@ -90,6 +91,7 @@ ggplot(MysterySiteDischarge.Pattern, aes(x = DayOfYear)) +
 7. What seasonal patterns do you see? What does this tell you about precipitation patterns and climate in the watershed?
 
 > There is a very strong seasonal pattern where discharge is elevated in the Winter and Spring months and very depressed during the summer and Fall. There is more variation in the high-discharge months as well, indicating that the increase is probably due to precipitation patterns. This looks like a relatively wet winter and dry summer. This looks a lot like a West Coast climate with relatively dry summers and wet winters - California's meditteranean climate and the PNW are both candidates for me. It could also be somewhere in the Mountain West, but I would expect more variability in the summer in that case due to summer thunderstorms in the Rockies occassionally dumping significant amounts of water. 
+Missed that there is no strong snowmelt pulse in the spring, so probably somewhere warm enough that snow is not part of the equation - rules out CA and probably the PNW as well.
 
 ## Create and analyze recurrence intervals
 
@@ -103,7 +105,7 @@ ggplot(MysterySiteDischarge.Pattern, aes(x = DayOfYear)) +
 #8 Create dataframes
 # first the first 30 years
 MysterySite.Annual.30yr <- MysterySiteDischarge %>%
-  filter(WaterYear <= 1994) %>%
+  filter(WaterYear <= 1995) %>%
   group_by(WaterYear) %>%
   summarise(PeakDischarge = max(Discharge)) %>%
   mutate(Rank = rank(-PeakDischarge),
@@ -139,6 +141,6 @@ MysterySite.RIModel.Full$coefficients[1] + MysterySite.RIModel.Full$coefficients
 
 11. How did the recurrence interval plots and predictions of a 100-year flood differ among the two data frames? What does this tell you about the stationarity of discharge in this river?
 
-> The recurrence interval plots are very similar out until about 20 years, then they start to diverge. This indicates a degree of stationarity, as anything smaller than a 20-year event is likely the same size now as it was 30-years ago. However, past 20 years is where there is some change and stationarity is not shown. The 30-year event for the first 30 years is the same size as the 50-year event for the full timeline, indicating potentially that large events are becoming more rare. This is backed up by the predictions for the 100-yr floods. The models predicted a 100-year flood about 1000cfs higher for the first 30 years than it was for the full timeframe, indicating that potentially this river is seeing reduced flows, reduced large precipitation events, and thus a smaller 100-year flood event now than was expected 30 years ago. Changing conditions are reducing this river's flow and frequency of large flood events. 
+> The recurrence interval plots are very similar out until about 20 years, then they start to diverge. This indicates a degree of stationarity, as anything smaller than a 20-year event is likely the same size now as it was 30-years ago. However, past 20 years is where there is some change. The 30-year event for the first 30 years is the same size as the 50-year event for the full timeline, indicating potentially that large events are becoming more rare. This is backed up by the predictions for the 100-yr floods. The models predicted a 100-year flood about 1000cfs higher for the first 30 years than it was for the full timeframe, indicating that potentially this river is seeing slightly reduced flows and thus a slightly smaller 100-year flood event now than was expected 30 years ago. Overall, this river is experiencing stationarity with maybe some minor shifts. 
 
 
