@@ -30,7 +30,76 @@ Target due date: 2022-02-15
 4. Calculate annual total discharge, annual baseflow, and annual proportion baseflow for the two sites.
 
 ```{r}
+#1 Setup
+#verify working directory
+getwd()
 
+#load packages
+library(tidyverse)
+library(cowplot)
+library(dataRetrieval)
+library(lubridate)
+library(lfstat)
+library(EcoHydRology)
+
+#set theme
+theme_set(theme_half_open(12))
+
+#2 Load Data
+Bitterroot.Discharge <- readNWISdv(siteNumbers = "12344000",
+                                   parameterCd = "00060", #discharge cfs
+                                   startDate = "2010-10-01",
+                                   endDate = "2021-09-30")
+Nehalem.Discharge <- readNWISdv(siteNumbers = "14299800",
+                                parameterCd = "00060",
+                                startDate = "2010-10-01",
+                                endDate = "2021-09-30")
+
+names(Bitterroot.Discharge)[4:5] <- c("Discharge", "Approval Code")
+names(Nehalem.Discharge)[4:5] <- c("Discharge", "Approval Code")
+
+attr(Bitterroot.Discharge, "variableInfo")
+attr(Bitterroot.Discharge, "siteInfo")
+attr(Nehalem.Discharge, "variableInfo")
+attr(Nehalem.Discharge, "siteInfo")
+
+#3 Add columns
+Bitterroot.Discharge <- Bitterroot.Discharge %>%
+  mutate(Year = year(Date),
+         WaterYear = water_year(Date, origin = "usgs"),
+         Baseflow = baseflow(Discharge),
+         Stormflow = Discharge - Baseflow)
+Bitterroot.Discharge$WaterYear <-
+  as.numeric(
+    as.character(Bitterroot.Discharge$WaterYear))
+
+Nehalem.Discharge <- Nehalem.Discharge %>%
+  mutate(Year = year(Date),
+         WaterYear = water_year(Date, origin = "usgs"),
+         Baseflow = baseflow(Discharge),
+         Stormflow = Discharge - Baseflow)
+Nehalem.Discharge$WaterYear <- 
+  as.numeric(
+    as.character(Nehalem.Discharge$WaterYear))
+
+#4 Calculate annual values
+Bitterroot.Discharge.annuals <- Bitterroot.Discharge %>%
+  group_by(WaterYear) %>%
+  summarise(Discharge.acft.year = sum(Discharge)*723.968,
+            Baseflow.acft.year = sum(Baseflow)*723.968,
+            Stormflow.acft.year = sum(Stormflow)*723.968,
+            prop.bf = Baseflow.acft.year/Discharge.acft.year,
+            prop.sf = Stormflow.acft.year/Discharge.acft.year) %>%
+  mutate_if(is.numeric, round, 2)
+# cfs*723.968 = acre-feet
+Nehalem.Discharge.annuals <- Nehalem.Discharge %>%
+  group_by(WaterYear) %>%
+  summarise(Discharge.acft.year = sum(Discharge)*723.968,
+            Baseflow.acft.year = sum(Baseflow)*723.968,
+            Stormflow.acft.year = sum(Stormflow)*723.968,
+            prop.bf = Baseflow.acft.year/Discharge.acft.year,
+            prop.sf = Stormflow.acft.year/Discharge.acft.year) %>%
+  mutate_if(is.numeric, round, 2)
 
 ```
 
