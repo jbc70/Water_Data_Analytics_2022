@@ -66,41 +66,59 @@ attr(Nehalem.Discharge, "siteInfo")
 #3 Add columns
 Bitterroot.Discharge <- Bitterroot.Discharge %>%
   mutate(Year = year(Date),
-         WaterYear = water_year(Date, origin = "usgs"),
-         Baseflow = baseflow(Discharge),
-         Stormflow = Discharge - Baseflow)
+         WaterYear = water_year(Date, origin = "usgs"))
+         #Baseflow = baseflow(Discharge),
+         #Stormflow = Discharge - Baseflow)
+#lfstat commented out because it skipped first and last few rows
+
+Bitterroot.Discharge.basesep <- 
+  BaseflowSeparation(Bitterroot.Discharge$Discharge)
+Bitterroot.Discharge <- cbind(Bitterroot.Discharge, 
+                              Bitterroot.Discharge.basesep) 
+#change WaterYear to numeric
 Bitterroot.Discharge$WaterYear <-
   as.numeric(
     as.character(Bitterroot.Discharge$WaterYear))
+class(Bitterroot.Discharge$WaterYear)
 
 Nehalem.Discharge <- Nehalem.Discharge %>%
   mutate(Year = year(Date),
-         WaterYear = water_year(Date, origin = "usgs"),
-         Baseflow = baseflow(Discharge),
-         Stormflow = Discharge - Baseflow)
+         WaterYear = water_year(Date, origin = "usgs"))
+        # Baseflow = baseflow(Discharge),
+        # Stormflow = Discharge - Baseflow)
+# again commented out for skips
+
+Nehalem.Discharge.basesep <- 
+  BaseflowSeparation(Nehalem.Discharge$Discharge)
+Nehalem.Discharge <- cbind(Nehalem.Discharge, 
+                           Nehalem.Discharge.basesep)
+
+# change WaterYear to numeric
 Nehalem.Discharge$WaterYear <- 
   as.numeric(
     as.character(Nehalem.Discharge$WaterYear))
+class(Nehalem.Discharge$WaterYear)
 
 #4 Calculate annual values
 Bitterroot.Discharge.annuals <- Bitterroot.Discharge %>%
   group_by(WaterYear) %>%
   summarise(Discharge.acft.year = sum(Discharge)*723.968,
-            Baseflow.acft.year = sum(Baseflow)*723.968,
-            Stormflow.acft.year = sum(Stormflow)*723.968,
-            prop.bf = Baseflow.acft.year/Discharge.acft.year,
-            prop.sf = Stormflow.acft.year/Discharge.acft.year) %>%
+            Bf.acft.year = sum(bt)*723.968,
+            Sf.acft.year = sum(qft)*723.968,
+            prop.bf = Bf.acft.year/Discharge.acft.year,
+            prop.sf = Sf.acft.year/Discharge.acft.year) %>%
   mutate_if(is.numeric, round, 2)
 # cfs*723.968 = acre-feet
 Nehalem.Discharge.annuals <- Nehalem.Discharge %>%
   group_by(WaterYear) %>%
   summarise(Discharge.acft.year = sum(Discharge)*723.968,
-            Baseflow.acft.year = sum(Baseflow)*723.968,
-            Stormflow.acft.year = sum(Stormflow)*723.968,
-            prop.bf = Baseflow.acft.year/Discharge.acft.year,
-            prop.sf = Stormflow.acft.year/Discharge.acft.year) %>%
+            Bf.acft.year = sum(bt)*723.968,
+            Sf.acft.year = sum(qft)*723.968,
+            prop.bf = Bf.acft.year/Discharge.acft.year,
+            prop.sf = Sf.acft.year/Discharge.acft.year) %>%
   mutate_if(is.numeric, round, 2)
 
+#why is lfstat not calculating baseflow or stormflow for the first  and last few entries for either river? 
 ```
 
 ## Analyze seasonal patterns in discharge
