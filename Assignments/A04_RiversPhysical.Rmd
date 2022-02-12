@@ -1,6 +1,6 @@
 ---
 title: "Assignment 4: Physical Properties of Rivers"
-author: "Student Name"
+author: "Jack Carpenter"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -35,12 +35,12 @@ Target due date: 2022-02-15
 getwd()
 
 #load packages
+library(EcoHydRology)
 library(tidyverse)
 library(cowplot)
 library(dataRetrieval)
 library(lubridate)
 library(lfstat)
-library(EcoHydRology)
 
 #set theme
 theme_set(theme_half_open(12))
