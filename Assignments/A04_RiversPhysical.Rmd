@@ -127,10 +127,75 @@ Nehalem.Discharge.annuals <- Nehalem.Discharge %>%
 6. For both sites, create a graph displaying annual total discharge and annual baseflow across years, and a second graph displaying the proportion baseflow across years (adjust axis labels accordingly). Plot these graphs on top of one another using `plot_grid`. Remember to align the axes!
 
 ```{r}
+#5 ggplots discharge, baseflow x date
+Bitterroot.Q.Bf.plot <- ggplot(Bitterroot.Discharge, 
+                               aes(x = Date, y = Discharge)) +
+  geom_line(color = "grey") +
+  geom_line(aes(y = bt)) + 
+  labs(x = "Year", y = "Discharge (cfs)", title = "Bitterroot River")
+Bitterroot.Q.Bf.plot
 
+Nehalem.Q.Bf.plot <- ggplot(Nehalem.Discharge,
+                            aes(x = Date, y = Discharge)) + 
+  geom_line(color = "grey") +
+  geom_line(aes(y = bt)) +
+  labs(x = "Year", y = "Discharge (cfs)", title = "Nehalem River")
+Nehalem.Q.Bf.plot
 
+#6 ggplots annual values
+Bitterroot.annual.plot <- ggplot(Bitterroot.Discharge.annuals,
+                                 aes(x = WaterYear, 
+                                     y = Discharge.acft.year)) +
+  geom_line() +
+  geom_line(aes(y = Bf.acft.year), lty = 2) +
+  scale_x_log10() +
+  labs(x = "Water Year", 
+       y = "Annual Discharge (acft)", 
+       title = "Bitterroot River")
+Bitterroot.annual.plot
+
+Bitterroot.prop.plot <- ggplot(Bitterroot.Discharge.annuals, 
+                               aes(x = WaterYear, y = prop.bf)) +
+  geom_col() + 
+  labs(x = "Water Year", y = "Baseflow Proportion")
+Bitterroot.prop.plot
+
+Bitterroot.plot <- plot_grid(
+  Bitterroot.annual.plot, 
+  Bitterroot.prop.plot,
+  align = "hv",
+  ncol = 1,
+  hjust = -1)
+Bitterroot.plot
+
+Nehalem.annual.plot <- ggplot(Nehalem.Discharge.annuals,
+                              aes(x = WaterYear, 
+                                  y = Discharge.acft.year)) +
+  geom_line() +
+  geom_line(aes(y = Bf.acft.year), lty = 2) +
+  scale_x_log10() +
+  labs(x = "Water Year", 
+       y = "Annual Discharge (ac-ft)",
+       title = "Nehalem River")
+Nehalem.annual.plot
+
+Nehalem.prop.plot <- ggplot(Nehalem.Discharge.annuals,
+                            aes(x = WaterYear, y = prop.bf)) +
+  geom_col() +
+  labs(x = "Water Year", y = "Baseflow Proportion")
+Nehalem.prop.plot
+
+Nehalem.plot <- plot_grid(
+  Nehalem.annual.plot,
+  Nehalem.prop.plot,
+  align = "vh",
+  ncol = 1)
+Nehalem.plot
+
+Bitterroot.plot
+Nehalem.plot
 ```
 
 7. How do these rivers differ in their discharge and baseflow, both within and across years? How would you attribute these patterns to the climatic conditions in these locations?
 
-> 
+> The Bitterroot has much higher seasonal and annual variability than the Nehalem, and also has a higher proportion of baseflow most years. The seasonal and annual pattern for the Bitterroot is highly snowpack dependent, so a lower snow year (or years consecutive) can have a large impact on the discharge for that year. The seasonal and annual pattern for the Nehalem is generally less variable seasonally and annually, but also has a much lower proportion baseflow, indicative of the fact that the river is dependent on year-round, steady precipitation rather than highly seasonal runoff. 
