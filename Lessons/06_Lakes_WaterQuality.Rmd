@@ -27,7 +27,8 @@ library(lubridate)
 library(LAGOSNE)
 
 theme_set(theme_classic())
-options(scipen = 100)
+options(scipen = 10) 
+#sets number of digits to run before showing scientific notation
 
 lagosne_get(dest_folder = LAGOSNE:::lagos_path(), overwrite = TRUE)
 
@@ -37,6 +38,8 @@ lagosne_get(dest_folder = LAGOSNE:::lagos_path(), overwrite = TRUE)
 Navigate to https://lagoslakes.org/. We will explore this website to learn about the LAGOS-NE dataset, research, and data management and use initiatives undergone by the resaerch team. 
 
 <add any pertinent notes here>
+#huge database, will be expanded to whole US soon from just the NE now
+#see vignettes about LAGOSNE for more information
 
 Useful introductions to the LAGOSNE R Package can be found here: 
 
@@ -52,9 +55,9 @@ names(LAGOSdata)
 # load(file = "./Data/Raw/LAGOSdata.rda")
 
 # Exploring the data types that are available
-LAGOSlocus <- LAGOSdata$locus
-LAGOSstate <- LAGOSdata$state
-LAGOSnutrient <- LAGOSdata$epi_nutr
+LAGOSlocus <- LAGOSdata$locus #spatial information
+LAGOSstate <- LAGOSdata$state #state information
+LAGOSnutrient <- LAGOSdata$epi_nutr #nutrient parameters
 
 # Tell R to treat lakeid as a factor, not a numeric value
 LAGOSlocus$lagoslakeid <- as.factor(LAGOSlocus$lagoslakeid)
@@ -71,9 +74,13 @@ For example, let's find out how many lakes are in each state. Note that LAGOSloc
 ```{r}
 # Join data frames
 LAGOSlocations <- left_join(LAGOSlocus, LAGOSstate, by = "state_zoneid")
+# link locus and state data
+# join commands typically connect if the same column on separate sheets but 
+# need to specify if named differently
+# example by = c("columnname1" = "columnname2" )
 
 ggplot(LAGOSlocations, aes(x = state)) + 
-  geom_bar(stat = "count")
+  geom_bar(stat = "count", fill = "blue")
 
 ggplot(LAGOSlocations, aes(x = state, y = lake_area_ha)) + 
   geom_boxplot() +
@@ -114,6 +121,8 @@ LAGOStrophic <- LAGOSnutrient %>%
   mutate(sampleyear = year(sampledate), 
          samplemonth = month(sampledate)) %>%
   drop_na(chla, tp, secchi, state)
+# for left join, start with (., after pipe to specify first dataframe since it needs two dataframes to function)
+#drop_na can be everywhere () or specified (col1, col2, etc)
 
 ```
 
@@ -125,7 +134,8 @@ ggplot(LAGOStrophic, aes(x = as.factor(samplemonth), y = chla)) +
   geom_jitter(alpha = 0.2, size = 0.5) +
   geom_boxplot(outlier.shape = NA, color = "#1f968b", fill = NA) +
   scale_y_log10() +
-  labs(x = "Month", y = expression("Chl a ("*mu*"g/L)"))
+  labs(x = "Month", y = expression("Chl a ("*mu*"g/L)"))+
+  facet_wrap(vars(state))
 
 ggplot(LAGOStrophic, aes(x = as.factor(samplemonth), y = secchi)) +
   geom_jitter(alpha = 0.2, size = 0.5) +
@@ -158,7 +168,7 @@ LAGOStrophic <- LAGOStrophic %>%
                                    TSI.chl >= 40 & TSI.chl < 50 ~ "Mesotrophic",
                                    TSI.chl >= 50 & TSI.chl< 70 ~ "Eutrophic",
                                    TSI.chl >= 70 ~ "Hypereutrophic"))
-
+#case_when creates a new column when each requirement is met - like an ifelse, but creates something rather than just sorts
 class(LAGOStrophic$trophic.class)
 
 LAGOStrophic$trophic.class <- factor(LAGOStrophic$trophic.class,
