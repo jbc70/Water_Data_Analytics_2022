@@ -37,6 +37,8 @@ options(scipen = 4)
 # Load LAGOSNE data into R session
 LAGOSdata <- lagosne_load()
 names(LAGOSdata)
+# rm(name) removes individual items from the environment
+# alternative to the broom wiping everything
 
 # If the package installation and data download has not worked, use this code: 
 # load(file = "./Data/Raw/LAGOSdata.rda")
@@ -116,7 +118,26 @@ Exercise:
 8. Create a linear model to evaluate the chlorophyll-TP relationship, with HUC 4 code as an interaction effect. Is it important to account for the HUC 4 code in the model? How might this classification impact potential nutrient management?
 
 ```{r}
-
+LAGOSMN <- LAGOSjoined %>%
+  left_join(., LAGOSdata$hu4) %>%
+  select(lagoslakeid, sampledate, state_name, hu4, chla, tn, tp) %>%
+  mutate(Year = year(sampledate),
+         Month = month(sampledate)) %>%
+  filter(state_name == "Minnesota") %>%
+  filter(Month %in% c(6:9)) %>%
+  filter(Year >= 1990) %>%
+  filter(hu4 %in% c("0401", "0701", "0702", "0703", "0704", "0902")) 
+         
+ggplot(LAGOSMN, aes(x = tp, y = chla, color = hu4)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm") +
+  facet_wrap(vars(hu4)) +
+  scale_x_log10() +
+  scale_y_log10()
+  
+MNmodel <- lm(data = LAGOSMN, log10(chla) ~ log10(tp) * hu4)
+plot(MNmodel)
+view(MNmodel)
 
 ```
 

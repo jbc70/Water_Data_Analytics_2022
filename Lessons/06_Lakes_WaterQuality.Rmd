@@ -30,7 +30,7 @@ theme_set(theme_classic())
 options(scipen = 10) 
 #sets number of digits to run before showing scientific notation
 
-lagosne_get(dest_folder = LAGOSNE:::lagos_path(), overwrite = TRUE)
+#lagosne_get(dest_folder = LAGOSNE:::lagos_path(), overwrite = TRUE)
 
 ```
 
@@ -205,7 +205,7 @@ ggplot(LAGOStrophic, aes(x = TSI.chl, y = TSI.tp, color = samplemonth)) +
 
 What is the observed relationship, and how does it depart from the 1:1 relationship? What do values above or below the 1:1 line tell us about the conditions present in a lake? (see NALMS description)[https://www.nalms.org/secchidipin/monitoring-methods/trophic-state-equations/]
 
-> 
+> See the source above
 
 ### Comparing TSI across states
 
@@ -218,14 +218,17 @@ ggplot(LAGOStrophic, aes(x = state, y = TSI.chl)) +
   geom_violin(draw_quantiles = 0.50) +
   geom_hline(yintercept = 40, lty = 2, color = "gray") +
   geom_hline(yintercept = 50, lty = 2, color = "gray") +
-  geom_hline(yintercept = 70, lty = 2, color = "gray")
+  geom_hline(yintercept = 70, lty = 2, color = "gray") +
+  # geom_rect()one way to fill in background layers/levels or
+  # geom_density to fill in just the violins
 
 ggplot(LAGOStrophic, aes(x = state, fill = trophic.class)) +
   geom_bar(stat = "count", position = position_dodge(preserve = "single")) +
   theme(legend.position = "top") +
   labs(x = "", y = "Number of Observations", fill = "Trophic Class") +
   scale_fill_viridis_d(option = "magma", begin = 0.2, end = 0.8, direction = -1)
-
+# position_dodge shows all the bars side-by-side rather than stacked
+# preserve = single makes all the bars the same width no matter how many per state
 ```
 
 ## Closing Discussion
