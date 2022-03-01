@@ -1,6 +1,6 @@
 ---
 title: "Assignment 5: Water Quality in Lakes"
-author: "Student Name"
+author: "Jack Carpenter"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -28,6 +28,27 @@ Target due date: 2022-02-22
 2. Load the LAGOSdata database and the trophic state index csv file we created in class.
 
 ```{r setup}
+#1 session setup
+getwd()
+
+library(tidyverse)
+library(lubridate)
+library(LAGOSNE)
+
+theme_set(theme_classic(base_size = 10) +
+          theme(axis.text = element_text(color = "black"),
+                legend.position = "right"))
+options(scipen = 10)
+
+#2 load data
+LAGOSdata <- lagosne_load()
+#now to make the TSI
+LAGOSlocus <- LAGOSdata$locus
+LAGOSstate <- LAGOSdata$state
+LAGOSnutrient <- LAGOSdata$epi_nutr
+
+LAGOSlocus$lagoslakeid <- as.factor(LAGOSlocus$lagoslakeid)
+LAGOSnutrient$lagoslakeid <- as.factor(LAGOSnutrient$lagoslakeid)
 
 ```
 
