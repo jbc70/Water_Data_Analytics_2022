@@ -49,7 +49,7 @@ In addition to the concentration of individual ions, one can also measure conduc
 
 The Neuse River has bacterial and chemical indicators of water quality going back through the 1970s. We will explore water quality indicators in this river and the temporal and flow-related sources of variability in those indicators.
 
-Parameters of interest: 
+Parameters of interest: google USGS parameter codes, locations
 
 00060: flow, cfs
 31625: fecal coliform 0.7 micron, CFU/100 mL
@@ -146,7 +146,7 @@ What is the relationship between flow and the water quality indicators?
 
 ggplot(NeuseFlow_summary, aes(x = DOY)) +
   geom_line(aes(y = median_Flow_cfs)) +
-  geom_ribbon(aes(ymin = p25_Flow_cfs, ymax = p75_Flow_cfs), fill = "gray", alpha = 0.2) +
+  geom_ribbon(aes(ymin = p25_Flow_cfs, ymax = p75_Flow_cfs), fill = "black", alpha = 0.2) +
   #geom_point(data = NeuseWQFlow_processed, aes(y = FecalColiform_cfu.100mL)) +
   #geom_point(data = NeuseWQFlow_processed, aes(y = SpC_uS.cm)) +
   scale_y_log10() +
@@ -182,7 +182,11 @@ Exercise:
 3. How do fecal coliform and specific conductivity vary as a function of hydrologic condition?
 
 ```{r}
+#1
+unique(NeuseWQ_processed$HydrologicCondition)
 
 
+#2
+ggplot(NeuseWQ_processed, aes(x = HydrologicCondition, y = Fecal))
 ```
 
