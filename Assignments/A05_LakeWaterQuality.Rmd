@@ -146,20 +146,28 @@ LAGOSNandP <- LAGOSNandP %>%
 
 7. Create two violin plots comparing TN and TP concentrations across states. Include a 50th percentile line inside the violins. Create a logged y axis and relabel axes.
 ```{r}
-ggplot()
+ggplot(LAGOSNandP, aes(x = state_name, y = tn)) +
+  geom_violin(draw_quantiles = 0.50) +
+  scale_y_log10() +
+  labs(x = "State", y = "TN")
+
+ggplot(LAGOSNandP, aes(x = state_name, y = tp)) +
+  geom_violin(draw_quantiles = 0.50) +
+  scale_y_log10() +
+  labs(x = "State", y = "TP")
 ```
 
 Which states have the highest and lowest median concentrations?
 
-> TN:
+> TN: highest is Iowa, lowest is Maine
 
-> TP:
+> TP: highest is Illinois, lowest is Maine again
 
 Which states have the largest and smallest concentration ranges?
 
-> TN: 
+> TN: largest range is New York, smallest is New Jersey
 
-> TP: 
+> TP: largest is Michigan, smallest is New Jersey
 
 8. Create two jitter plots comparing TN and TP concentrations across states, with samplemonth as the color. Choose a color palette other than the ggplot default.
 
