@@ -184,7 +184,7 @@ Exercise:
 ```{r}
 #1
 unique(NeuseWQ_processed$HydrologicCondition)
-
+#google reorder factor levels
 
 #2
 ggplot(NeuseWQ_processed, aes(x = HydrologicCondition, y = Fecal))
