@@ -172,14 +172,26 @@ Which states have the largest and smallest concentration ranges?
 8. Create two jitter plots comparing TN and TP concentrations across states, with samplemonth as the color. Choose a color palette other than the ggplot default.
 
 ```{r}
+ggplot(LAGOSNandP, aes(x = state_name, y = tn, color = samplemonth)) +
+  geom_jitter(alpha = 0.2, size = 0.5) +
+  geom_boxplot(outlier.shape = NA, color = "black", fill = NA) +
+  scale_y_log10() +
+  scale_color_viridis_c() +
+  labs(x = "State", y = "TN", color = "Month")
 
+ggplot(LAGOSNandP, aes(x = state_name, y = tp, color = samplemonth)) +
+  geom_jitter(alpha = 0.2, size = 0.5) +
+  geom_boxplot(outlier.shape = NA, color = "black", fill = NA) +
+  scale_y_log10() +
+  scale_color_viridis_c() + 
+  labs(x = "State", y = "TN", color = "Month")
 ```
 
 Which states have the most samples? How might this have impacted total ranges from #7?
 
-> TN:
+> TN: Missouri, Minnesota and New York have the most samples, and likely is partly why they have larger ranges than other states. More samples means more chances to have very high and very low sample values.
 
-> TP: 
+> TP: Wisconsin, New York, and Missouri have the most samples here. Similar impact as with TN, where these states have larger ranges than most.  
 
 
 
