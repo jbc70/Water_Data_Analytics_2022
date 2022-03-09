@@ -41,7 +41,7 @@ library(dataRetrieval)
 theme_set(theme_classic(base_size = 10)+
             theme(axis.text = element_text(color = "black"),
                   legend.position = "right"))
-options(scipen = 10)
+options(scipen = 4)
 
 #2 load data
 NCdata <- readWQPdata(statecode = "North Carolina", 
@@ -118,6 +118,10 @@ NCdata_processed <- NCdata %>%
                                           DetectionQuantitationLimitMeasure.MeasureValue, 
                                         TRUE ~ ResultMeasureValue)) %>%
   drop_na(Variable, ResultMeasureValue, Depth_m)
+
+NCdata_processed$ActivityStartDate <- as.Date(NCdata_processed$ActivityStartDate, format = "%m/%d/%Y")
+
+
   
 
 ```
