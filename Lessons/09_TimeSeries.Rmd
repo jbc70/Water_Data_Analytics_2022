@@ -67,18 +67,20 @@ names(NeuseFlow)[4:5] <- c("Discharge", "Approval.Code")
 # Plot discharge over time
 ggplot(NeuseFlow, aes(x = Date, y = Discharge)) +
   geom_line() +
-  labs(x = "", y = "Discharge (cfs)")
+  labs(x = "", y = "Discharge (cfs)") + 
+  scale_y_log10() +
+  geom_smooth(method = lm)
 
 
 ```
 
 How would you characterize the time series of discharge and conductivity at this location? Do you see a linear trend over time? What factors might you need to take into account to be able to detect a trend or forecast future conditions?
 
->
+> Not really a good trend, lots of noise/variability. Potentially seasonal trend, but not a strong one. Maybe slightly increasing trend for extreme events. Add a log scale, can maybe see more of a trend? 
 
 Are there situations where it would be appropriate to use a linear regression to model a time series? If so, what is an example?
 
->
+> Yes. Withdrawals from a river, reservoir, or aquifer over time or any sort of change over time that may have a linear progression. Aggregated data can also be good for linear, or it can be used as an exploratory tool.
 
 
 ## Decomposing a time series dataset
@@ -96,10 +98,13 @@ Note: time series objects must be equispaced, which requires interpolation if th
 ```{r}
 
 Neuse_ts <- ts(NeuseFlow[[4]], frequency = 365)
-
+# double brackets are coding convention within ts function
+# frequency = 365 for daily, 12 for monthly, etc
+# may have to account for leap years
 ```
 
-The `stl` function decomposes the time series object into its component parts. We must specify that the window for seasonal extraction is either "periodic" or a specific number of at least 7. The decomposition proceeds through a loess (locally estimated scatterplot smoothing) function.
+The `stl` function decomposes the time series object into its component parts. We must specify that the window for seasonal extraction is either "periodic" or a specific number of at least 7. The decomposition proceeds through a loess (locally estimated scatterplot smoothing) function. 
+> Loess is a kind of moving average funtion
 
 ```{r}
 ?stl
@@ -160,8 +165,8 @@ We see that conductivity data were collected approximately monthly across the sa
 
 Common interpolation methods: 
 
-* **Piecewise constant**: <fill in notes here>
-* **Linear**: <fill in notes here>
+* **Piecewise constant**: nearest neighbor
+* **Linear**: connect-the-dots
 * **Spline**: <fill in notes here>
 
 Linear interpolation is most common for water quality data, and fits with our understanding about how conductivity might change over time in this system. 
@@ -169,7 +174,7 @@ Linear interpolation is most common for water quality data, and fits with our un
 ```{r}
 # create a data frame of months
 Months <- data.frame(Date_monthrounded = seq.Date(from = as.Date("1980-10-01"), to = as.Date("2021-12-01"), by = "month"))
-
+#here we're really just making sure we have equally spaced data and month works because of the way this data was collected
 NeuseCond_processed <- NeuseCond %>%
   select(Date = ActivityStartDate,
          Conductivity = ResultMeasureValue) %>%
@@ -177,13 +182,16 @@ NeuseCond_processed <- NeuseCond %>%
          Month = month(Date),
          Date_monthrounded = floor_date(Date, "month")) %>%
   arrange(Date)
-
+# this method of processing works with data that has only one source - would not work if ResultMeasureValue was more than just conductivity
+# floor_date rounds down the date, according to month (specified)
 NeuseCond_monthly <- left_join(Months, NeuseCond_processed)
 
 # Generate monthly values from October 1980 to December 2021
 linearinterpolation <- as.data.frame(approx(NeuseCond_monthly$Conductivity, n = 566, method = "linear"))
+# approx function approximates data and creates new df
 NeuseCond_monthly$Conductivity <- linearinterpolation$y
-
+#above we are telling R to name the y column in the new df Conductivity
+ 
 ```
 
 ### Exercise: decompose the conductivity time series
@@ -192,6 +200,18 @@ NeuseCond_monthly$Conductivity <- linearinterpolation$y
 3. Analyze the decomposed time series. Is there distinct seasonality? How does the magnitude of seasonality compare to the trend and random components of the time series? What are some caveats that need to be considered for the gap between October 2001 through February 2007?
 
 ```{r}
+#1 
+Neuse_cond_ts <- ts(NeuseCond_monthly[[3]], frequency = 12)
+
+#2
+Neuse_cond_decomp <- stl(Neuse_cond_ts, s.window = "periodic")
+plot(Neuse_cond_decomp)
+
+#3
+# Not really distinct seasonality, since it has such a small magnitude relative to the data/trend, but is maybe significant at 5-10% of magnitude
+# gap is super simplified, can probably just ignore it
+# alternative is to splice the seasonal trend onto interpolation
+
 
 ```
 
