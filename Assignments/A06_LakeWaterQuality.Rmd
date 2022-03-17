@@ -37,6 +37,7 @@ getwd()
 library(tidyverse)
 library(lubridate)
 library(dataRetrieval)
+library(viridis)
 
 theme_set(theme_classic(base_size = 10)+
             theme(axis.text = element_text(color = "black"),
@@ -118,14 +119,33 @@ NCdata_processed <- NCdata %>%
                                           DetectionQuantitationLimitMeasure.MeasureValue, 
                                         TRUE ~ ResultMeasureValue)) %>%
   drop_na(Variable, ResultMeasureValue, Depth_m)
-
+#3
 NCdata_processed$ActivityStartDate <- as.Date(NCdata_processed$ActivityStartDate, format = "%m/%d/%Y")
 
-
+#4
+NCdata_processed <- NCdata_processed %>%
+  select(OrganizationIdentifier, OrganizationFormalName, ActivityStartDate,
+         ActivityConductingOrganizationText, MonitoringLocationIdentifier,
+         Depth_m, ResultMeasureValue, Variable) %>%
+  group_by(OrganizationIdentifier, OrganizationFormalName, ActivityStartDate,
+         ActivityConductingOrganizationText, MonitoringLocationIdentifier,
+         Depth_m, Variable) %>%
+  summarise(ResultMeasureValue = mean(ResultMeasureValue, na.rm = TRUE)) %>%
+  pivot_wider(names_from = "Variable", values_from = "ResultMeasureValue") %>%
+  mutate(Month = month(ActivityStartDate),
+         Year = year(ActivityStartDate)) %>%
+  filter(Month %in% c(5:10)) %>%
+  filter(Depth_m <= 1)
   
+ggplot(NCdata_processed, aes(x = TP_mgL, y = Chla_ugL)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  scale_y_log10() +
+  scale_x_log10() +
+  labs(x = "TP", y = "Chla")
 
 ```
   
 6. How might you expect this stressor-response relationship to change (or not) across the Mountains, Piedmont, and Coastal Plain regions of the state? How might you anticipate natural lakes might behave differently than reservoirs?
 
-> 
+> I think this stressor response probably is steeper in the mountains where there is likely less natural phosphorus in the water and an influx may cause a stronger response compared to the piedmont or coastal plain where agricultural runoff has elevated levels of phosphorus constantly so an influx in P will not cause as steep a reaction in chla. I also anticipate natural lakes to have a stronger response to phosphorus than reservoirs, as reservoirs are generally larger and will need higher amounts of phosphorus to cause a similarly sized or measured reaction.
