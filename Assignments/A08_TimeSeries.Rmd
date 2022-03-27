@@ -36,7 +36,9 @@ library(trend)
 library(forecast)
 library(dataRetrieval)
 
-theme_set(theme_classic())
+theme_set(theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 10), 
+        legend.position = "right"))
 ```
 
 ## Data Import and Processing
