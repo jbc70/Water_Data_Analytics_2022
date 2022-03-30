@@ -27,7 +27,7 @@ library(cowplot)
 library(trend)
 #install.packages("forecast")
 library(forecast)
-#install.packages(tseries)
+#install.packages("tseries")
 library(tseries)
 
 theme_set(theme_classic())
