@@ -154,30 +154,60 @@ Your turn! Notice that Maine has a large number of lakes with secchi depth measu
 1. Filter the states and secchi depth datasets so that they contain Maine only. For the secchi depth dataset, create a summary dataset with just the mean secchi depth. 
 
 ```{r}
+states.maine <- states.subset %>%
+  filter(ID == "maine")
 
+secchi.maine <- LAGOScombined %>%
+  filter(state == "ME") %>%
+  group_by(lagoslakeid) %>%
+  summarise(secchi.mean = mean(secchi),
+            area = mean(lake_area_ha),
+            depth = mean(maxdepth),
+            lat = mean(nhd_lat), 
+            long = mean(nhd_long)) %>%
+  drop_na()
+
+secchi.spatial.maine <- st_as_sf(secchi.maine, coords = c("long", "lat"), crs = 4326)
 ```
 
 2. Create a plot of mean secchi depth for lakes in Maine, with mean secchi depth designated as color and the lake area as the size of the dot. Remember that you are using size in the aesthetics and should remove the size = 1 from the other part of the code. Adjust the transparency of points as needed.
 
 ```{r}
-
+Area_plot <- 
+  ggplot() +
+  geom_sf(data = states.maine, fill = "white") +
+  geom_sf(data = secchi.spatial.maine, aes(color = secchi.mean, size = area), 
+          alpha = 0.5) +
+  scale_color_viridis_c(trans = "log10", end = 0.8, direction = -1) +
+  labs(color = "Average Secchi Depth (m)", size = "Area") +
+  theme(legend.position = "top")
 ```
 
 3. Create a second plot, but this time use maximum depth of the lake as the size of the dot. 
 
 ```{r}
-
+Depth_plot <- 
+  ggplot() +
+  geom_sf(data = states.maine, fill = "white") +
+  geom_sf(data = secchi.spatial.maine, aes(color = secchi.mean, size = depth), 
+          alpha = 0.5) +
+  scale_color_viridis_c(trans = "log10", end = 0.8, direction = -1) +
+  labs(color = "Average Secchi Depth (m)", size = "Max Depth") +
+  theme(legend.position = "top")
 ```
 
 4. Plot these maps in the same plot with the `plot_grid` function. Don't worry about adjusting the legends (if you have extra time this would be a good bonus task).
 
 ```{r}
+plot_grid(Area_plot, Depth_plot,
+          ncol = 2,
+          align = "hv")
 
 ```
 
 5. What relationships do you see between secchi depth, lake area, and lake depth? Which of the two lake variables seems to be a stronger determinant of secchi depth? (you can make a scatterplot or run a regression to test this if time remains)
 
-> 
+> Deeper lakes have deeper secchi depths, hard to tell with these aesthetics (limitation of these methods)
 
 ## Visualizing Secchi depth over time
 
