@@ -62,19 +62,55 @@ LAGOSdata <- lagosne_load()
 LAGOSlocus <- LAGOSdata$locus
 LAGOSstate <- LAGOSdata$state
 LAGOSnutrient <- LAGOSdata$epi_nutr
-LAGOSlimno <- LAGOSdata$lakes_limno
 
 #joined at the hip
 LAGOScombined <- 
   left_join(LAGOSnutrient, LAGOSlocus) %>%
-  left_join(., LAGOSlimno) %>%
   left_join(., LAGOSstate) %>%
-  filter(!is.na(state)) %>% #remove NAs in state data
-  select(lagoslakeid, sampledate, chla, nhd_lat, nhd_long, state) #choose data
+  select(lagoslakeid, sampledate, chla, nhd_lat, nhd_long, state)#choose data
+
 
 #state your name
+states <- st_as_sf(map(database = "state", plot = TRUE, fill = TRUE, 
+                       col = "white"))
+states.NH <- filter(states, ID == "new hampshire")
+
+ggplot(states.NH) +
+  geom_sf(fill = "white") #double check that it'll map
+
+LAGOS.NH <- LAGOScombined %>%
+  group_by(lagoslakeid) %>%
+  filter(state == "NH") %>%
+  drop_na(chla)
+  
+#choose 5 random lakes
+samplelakes <- sample(x = LAGOS.NH$lagoslakeid, size = 5)
+
+NH.Sample <- LAGOS.NH %>%
+  filter(lagoslakeid %in% samplelakes)
 
 
+#map it up, fuzzball
+NH.sample.spatial <- st_as_sf(NH.Sample, coords= c("nhd_long", "nhd_lat"), 
+                              crs = 4326)
+
+ggplot() +
+  geom_sf(data = states.NH, fill = "white") +
+  geom_sf(data = NH.sample.spatial, aes(color = as.factor(lagoslakeid)), 
+          alpha = 0.8, size = 1)+
+  scale_color_viridis_d() +
+  labs(color = "Lake ID")
+
+ggplot(NH.Sample, aes(x = as.factor(lagoslakeid), y = chla,
+                   fill = as.factor(lagoslakeid))) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.5) +
+  geom_jitter(alpha = 0.5) +
+  scale_y_log10() +
+  scale_color_viridis_d() +
+  labs(x = "Lake ID", y = expression("Chlorophyll a ("*mu*"g/L)", fill = ""))+
+  theme(legend.position = "none")
+
+#I can't get the colors to match, even though I'm using the same color scale
 
 ```
 
@@ -85,13 +121,67 @@ LAGOScombined <-
 
 
 ```{r}
+#what do we have?
+ENOparams <- whatNWISdata(siteNumbers = "02085070")
+
+#where is it
+ENOcoords <- ENOparams %>%
+  select(site_no, dec_lat_va, dec_long_va) %>%
+  distinct()
+
+#define a starting point
+start_point <- st_sfc(st_point(c(ENOcoords$dec_long_va, ENOcoords$dec_lat_va)),
+                      crs = 4326)
+start_comid <- discover_nhdplus_id(start_point)
+
+#navigate the NLDI
+NLDI <- navigate_nldi(list(featureSource = "comid", featureID = start_comid),
+                      mode = "upstreamTributaries",
+                      distance_km = 1000)
+
+#watershed and flowpath - this is just the syntax that nhdplus needs
+subset_file <- tempfile(fileext = ".gpkg") #needs the "." 
+subset <- subset_nhdplus(comids = as.integer(NLDI$UT$nhdplus_comid),
+                         output_file = subset_file,
+                         nhdplus_data = "download",
+                         flowline_only = FALSE,
+                         return_data = TRUE,
+                         overwrite = FALSE)
+
+#create data frames from the subset list
+flowlines <- subset$NHDFlowline_Network
+catchment <- subset$CatchmentSP
+# double check they each are sf, tbl, and df classes
+#class(flowlines) 
+#class(catchment)
 
 
+#find gages near/in watershed
+gages <- get_nwis(AOI = catchment) #AOI is area of interest
+class(gages) #also as sf and df
+
+gages <- st_intersection(gages, catchment) #now ONLY gages IN catchment
+
+#now map it out
+plot_nhdplus("USGS-02085070") #first way to map - easiest and broadest
+
+ggplot() + #ggplot version, can control more aesthetics
+  geom_sf(data = catchment, fill = "white", color = "grey", lwd = 0.5) +
+  geom_sf(data = flowlines, aes(color = streamorde))+
+  geom_sf(data = gages, color = "red", size = 1) +
+  labs(color = "Stream Order")
+
+#analysis
+max(flowlines$totdasqkm) #total drainage area in km^2
+
+summary(as.factor(flowlines$streamorde))
+
+view(gages)
 ```
 
 4. What is the upstream drainage area for this gage, and how are the flowpaths distributed with regard to stream order?
 
-> 
+> The upstream drainage area is 367.68 square kilometers. Flowpaths are distributed with 123 first-order streams, 45 second-order streams, 19 thrid-order streams, and 28 fourth-order streams.
 
 5. Are there any other gage sites in the upstream catchment? If so, where are they?
-> 
+> Yes there are two more, in Hillsborough and at Cole Mill Rd near Huckleberry Spring.
