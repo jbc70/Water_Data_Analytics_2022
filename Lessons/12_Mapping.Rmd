@@ -20,7 +20,7 @@ library(tidyverse)
 library(dataRetrieval)
 library(maps)
 library(sf)
-# install.packages("nhdplusTools")
+#install.packages("nhdplusTools")
 library(nhdplusTools)
 
 theme_set(theme_classic())
@@ -55,12 +55,13 @@ NeuseParams <- whatNWISdata(siteNumbers = "02089500")
 # Extract latitude and longitude for the site
 NeuseCoords <- NeuseParams %>%
   select(site_no, dec_lat_va, dec_long_va) %>%
-  distinct()
+  distinct() #creates df with distinct rows instead of repeats
 
 # Define the gage site as the starting point
 start_point <- st_sfc(st_point(c(NeuseCoords$dec_long_va, NeuseCoords$dec_lat_va)), 
                       crs = 4269) # NAD83, commonly  used by US agencies
 start_comid <- discover_nhdplus_id(start_point)
+#additional way to get a start point
 # start_point2 <- st_as_sf(data.frame(x = NeuseCoords$dec_long_va, y =  NeuseCoords$dec_lat_va), 
 #                             coords = c("x", "y"), crs = 4269)
 
@@ -71,28 +72,28 @@ NLDI <- navigate_nldi(list(featureSource = "comid", featureID = start_comid),
 
 # Extract watershed and flowpath information
 subset_file <- tempfile(fileext = ".gpkg")
-subset <- subset_nhdplus(comids = as.integer(NLDI$UT$nhdplus_comid),
+subset <- subset_nhdplus(comids = as.integer(NLDI$UT$nhdplus_comid),#should match start_comid
                          output_file = subset_file,
                          nhdplus_data = "download", 
                          flowline_only = FALSE,
                          return_data = TRUE, overwrite = TRUE)
 
 # Create data frames
-flowline <- subset$NHDFlowline_Network
-catchment <- subset$CatchmentSP
-waterbody <- subset$NHDWaterbody
+flowline <- subset$NHDFlowline_Network #line segments within watershed
+catchment <- subset$CatchmentSP #polygons with 0 or 1 inlet, 1 outlet
+waterbody <- subset$NHDWaterbody #anything not a river or stream
 
 class(flowline)
 class(catchment)
 class(waterbody)
 
 # find gages near watershed
-gages <- get_nwis(AOI = catchment)
+gages <- get_nwis(AOI = catchment) #AOI = Area of Interest
 class(gages)
 
 # find gages only within watershed
-gages <- st_intersection(gages, catchment)
-
+gages <- st_intersection(gages, catchment) #only gages within the catchment
+#st_difference is reverse of st_intersection
 ```
 
 ### Mapping the network
@@ -108,7 +109,8 @@ Extensions:
 
 ```{r}
 
-plot_nhdplus("USGS-02089500", streamorder = 3)
+plot_nhdplus("USGS-02089500", streamorder = 3) #can specify minimum stream order
+#do not need to pull previous information to run this command, just need site #
 
 states <- st_as_sf(map(database = "state", plot = FALSE, fill = TRUE, col = "white"))
 nc <- filter(states, ID == "north carolina")
@@ -143,6 +145,6 @@ ggplot(subset(flowline, slope >= 0),
   geom_boxplot() +
   scale_y_log10()
   
-max(flowline$totdasqkm)
+max(flowline$totdasqkm) #totaldrainage area in square km
 
 ```
